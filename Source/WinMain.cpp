@@ -4,25 +4,21 @@
 #include <WS2tcpip.h>
 #include <iphlpapi.h>
 
+#include <cstdio>
 #include <cstdlib>
 
-int WINAPI wWinMain
-(
-	[[maybe_unused]] _In_		HINSTANCE	hInstance,
-	[[maybe_unused]] _In_opt_	HINSTANCE	hPrevInstance,
-	[[maybe_unused]] _In_		PWSTR		pCmdLine,
-	[[maybe_unused]] _In_		int			nCmdShow
-)
+int main(int argc, char** argv)
 {
-	WSADATA		socket_data		= { 0 };
-	int			creation_result	= 0;
+	WSADATA		socket_data = { 0 };
+	int			creation_result = 0;
 
-	creation_result = WSAStartup(MAKEWORD(2,2), &socket_data);
+	creation_result = WSAStartup(MAKEWORD(2, 2), &socket_data);
 	if (creation_result != 0)
 	{
-		MessageBox(nullptr, L"WSAStartup: Failed to create socket!", L"SocketTest - Engine Error", MB_ICONERROR | MB_OK);
+		printf("[Engine Error]: failed to create valid socket!\n");
 		return EXIT_FAILURE;
 	}
 
+	printf("[Engine]: Socket context created %i\n", creation_result);
 	return EXIT_SUCCESS;
 }
