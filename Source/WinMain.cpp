@@ -7,34 +7,67 @@
 #include <cstdio>
 #include <cstdlib>
 
-int client_handler(SOCKET client_socket);
-int create_server_socket();
+#define DEFAULT_PORT "12862"
 
-int main(int argc, char** argv)
-{
-	WSADATA		socket_data = { 0 };
-	int			creation_result = 0;
+// Once accepting a client, send the client to the socket where data can be sent/recieved
+int client_handler(SOCKET client_socket) {
+#define DEFAULT_BUFLEN 512
 
-	creation_result = WSAStartup(MAKEWORD(2, 2), &socket_data);
-	if (creation_result != 0)
-	{
-		printf("[Engine Error]: failed to create valid socket!\n");
-		return EXIT_FAILURE;
+	char recvbuf[DEFAULT_BUFLEN];
+	int iResult, iSendResult;
+	int recvbuflen = DEFAULT_BUFLEN;
+
+	// Receive until the peer shuts down the connection
+	do {
+
+		iResult = recv(client_socket, recvbuf, recvbuflen, 0);
+		if (iResult > 0) {
+			printf("Bytes received: %d\n", iResult);
+
+			// Echo the buffer back to the sender
+			iSendResult = send(client_socket, "You are connected!", iResult, 0);
+			if (iSendResult == SOCKET_ERROR) {
+				printf("send failed: %d\n", WSAGetLastError());
+				closesocket(client_socket);
+				WSACleanup();
+				return 1;
+			}
+			printf("Bytes sent: %d\n", iSendResult);
+		}
+		else if (iResult == 0)
+			printf("Connection closing...\n");
+		else {
+			printf("recv failed: %d\n", WSAGetLastError());
+			closesocket(client_socket);
+			WSACleanup();
+			return 1;
+		}
+
+	} while (iResult > 0);
+
+	// shutdown the send half of the connection since no more data will be sent
+	iResult = shutdown(client_socket, SD_SEND);
+	if (iResult == SOCKET_ERROR) {
+		printf("shutdown failed: %d\n", WSAGetLastError());
+		closesocket(client_socket);
+		WSACleanup();
+		return 1;
 	}
 
-	printf("[Engine]: Socket context created %i\n", creation_result);
+	// cleanup
+	closesocket(client_socket);
+	WSACleanup();
 
-	create_server_socket();
-
-	return EXIT_SUCCESS;
+	return 0;
 }
+
 
 int create_server_socket() 
 {
-	#define DEFAULT_PORT "12862"
-
 	int creation_results = 0;
-	struct addrinfo* result = NULL, * ptr = NULL, hints;
+	struct addrinfo* result = NULL;
+	[[maybe_unused]] struct addrinfo* ptr = NULL;
+	struct addrinfo hints;
 
 	ZeroMemory(&hints, sizeof(hints));
 	hints.ai_family = AF_INET;
@@ -101,54 +134,22 @@ int create_server_socket()
 	client_handler(ClientSocket);
 }
 
-// Once accepting a client, send the client to the socket where data can be sent/recieved
-int client_handler(SOCKET client_socket) {
-#define DEFAULT_BUFLEN 512
 
-	char recvbuf[DEFAULT_BUFLEN];
-	int iResult, iSendResult;
-	int recvbuflen = DEFAULT_BUFLEN;
+int main(int argc, char** argv)
+{
+	WSADATA		socket_data = { 0 };
+	int			creation_result = 0;
 
-	// Receive until the peer shuts down the connection
-	do {
-
-		iResult = recv(client_socket, recvbuf, recvbuflen, 0);
-		if (iResult > 0) {
-			printf("Bytes received: %d\n", iResult);
-
-			// Echo the buffer back to the sender
-			iSendResult = send(client_socket, "You are connected!", iResult, 0);
-			if (iSendResult == SOCKET_ERROR) {
-				printf("send failed: %d\n", WSAGetLastError());
-				closesocket(client_socket);
-				WSACleanup();
-				return 1;
-			}
-			printf("Bytes sent: %d\n", iSendResult);
-		}
-		else if (iResult == 0)
-			printf("Connection closing...\n");
-		else {
-			printf("recv failed: %d\n", WSAGetLastError());
-			closesocket(client_socket);
-			WSACleanup();
-			return 1;
-		}
-
-	} while (iResult > 0);
-
-	// shutdown the send half of the connection since no more data will be sent
-	iResult = shutdown(client_socket, SD_SEND);
-	if (iResult == SOCKET_ERROR) {
-		printf("shutdown failed: %d\n", WSAGetLastError());
-		closesocket(client_socket);
-		WSACleanup();
-		return 1;
+	creation_result = WSAStartup(MAKEWORD(2, 2), &socket_data);
+	if (creation_result != 0)
+	{
+		printf("[Engine Error]: failed to create valid socket!\n");
+		return EXIT_FAILURE;
 	}
 
-	// cleanup
-	closesocket(client_socket);
-	WSACleanup();
+	printf("[Engine]: Socket context created %i\n", creation_result);
 
-	return 0;
+	create_server_socket();
+
+	return EXIT_SUCCESS;
 }
