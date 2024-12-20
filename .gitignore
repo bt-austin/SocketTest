@@ -1,0 +1,6 @@
+# Visual Studio Excludes
+/.vs
+
+# Project Excludes
+/Binaries
+/Intermediate
