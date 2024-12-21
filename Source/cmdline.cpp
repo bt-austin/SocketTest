@@ -1,5 +1,6 @@
 #include "cmdline.h"
 #include "ArenaAllocator.h"
+#include "client_server_header.h"
 
 #include <malloc.h>
 #include <cstring>
@@ -81,11 +82,11 @@ void ExecuteCommandLine(cmdline_t* cmdline)
 	if (cmdline->net & NET_CLIENT)
 	{
 		// TODO: Excute Client Program
-		printf("We're running the client! Connecting to %s...\n", cmdline->ip);
+		create_client_socket(cmdline->argv);
 	}
 	else if (cmdline->net & NET_SERVER)
 	{
 		// TODO: Excute Server program
-		printf("We're running the server with host ip at %s...\n", cmdline->ip);
+		create_server_socket(cmdline->argv);
 	}
 }

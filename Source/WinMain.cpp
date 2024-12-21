@@ -1,27 +1,20 @@
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#include <Winsock2.h>
-#include <WS2tcpip.h>
-#include <iphlpapi.h>
+#include "cmdline.h"
 
 #include <cstdio>
 #include <cstdlib>
 
-#define DEFAULT_PORT "12862"
 
 int main(int argc, char** argv)
 {
-	WSADATA		socket_data = { 0 };
-	int			creation_result = 0;
+	cmdline_t* cmdline = CreateCommandLine(argc, argv);
 
-	creation_result = WSAStartup(MAKEWORD(2, 2), &socket_data);
-	if (creation_result != 0)
+	if (!ParseCommandLine(cmdline))
 	{
-		printf("[Engine Error]: failed to create valid socket!\n");
+		printf("[ERROR]: Failed to parse command-line!\n");
 		return EXIT_FAILURE;
 	}
 
-	printf("[Engine]: Socket context created %i\n", creation_result);
-
+	ExecuteCommandLine(cmdline);
+	DeleteCommandLine(cmdline);
 	return EXIT_SUCCESS;
 }

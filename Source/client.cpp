@@ -82,7 +82,7 @@ int create_client_socket(char** argv)
 	hints.ai_protocol = IPPROTO_TCP;
 
 	// Resolve the server address and port
-	iResult = getaddrinfo("99.69.11.43", DEFAULT_PORT, &hints, &result);
+	iResult = getaddrinfo(argv[1], DEFAULT_PORT, &hints, &result);
 	if (iResult != 0) {
 		printf("getaddrinfo failed: %d\n", iResult);
 		WSACleanup();
@@ -137,10 +137,9 @@ int create_client_socket(char** argv)
 		printf("Success closing client socket");
 		return 0;
 	}
-
-	return 1;
 }
 
+/*
 int main(int argc, char** argv)
 {
 	WSADATA		socket_data = { 0 };
@@ -167,3 +166,4 @@ int main(int argc, char** argv)
 	// If for some reason the server socket creation was never done, then exit on failure.
 	return EXIT_FAILURE;
 }
+*/

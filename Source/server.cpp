@@ -68,6 +68,18 @@ int client_handler(SOCKET client_socket) {
 // TODO: Change to use multi-threading for multiple clients, currently accepts only one.
 int create_server_socket(char** argv)
 {
+	WSADATA		socket_data = { 0 };
+	int			creation_result = 0;
+
+	creation_result = WSAStartup(MAKEWORD(2, 2), &socket_data);
+	if (creation_result != 0)
+	{
+		printf("[Engine Error]: failed to create valid socket!\n");
+		return EXIT_FAILURE;
+	}
+
+	printf("[Engine]: Socket context created %i\n", creation_result);
+
 	int creation_results = 0;
 	struct addrinfo* result = NULL;
 	[[maybe_unused]] struct addrinfo* ptr = NULL;
@@ -80,14 +92,12 @@ int create_server_socket(char** argv)
 	hints.ai_flags = AI_PASSIVE;
 
 	// Resolve the local address and port to be used by the server
-	creation_results = getaddrinfo(NULL, DEFAULT_PORT, &hints, &result);
+	creation_results = getaddrinfo(nullptr, DEFAULT_PORT, &hints, &result);
 	if (creation_results != 0) {
 		printf("getaddrinfo failed: %d\n", creation_results);
 		WSACleanup();
 		return 1;
 	}
-
-	printf("Address: %s\n", result->ai_addr);
 
 	SOCKET ListenSocket = INVALID_SOCKET;
 
@@ -156,11 +166,9 @@ int create_server_socket(char** argv)
 	}
 
 	// ** NOTICE ** if there were multiple clients, we don't want the listening socket to close
-
-	// If we make it to this point, return on failure
-	return 1;
 }
 
+/*
 int main(int argc, char** argv)
 {
 	WSADATA		socket_data = { 0 };
@@ -187,3 +195,4 @@ int main(int argc, char** argv)
 	// If for some reason the server socket creation was never done, then exit on failure.
 	return EXIT_FAILURE;
 }
+*/
