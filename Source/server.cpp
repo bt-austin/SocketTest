@@ -1,3 +1,5 @@
+#include "client_server_header.h"
+
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <Winsock2.h>
@@ -7,12 +9,9 @@
 #include <cstdio>
 #include <cstdlib>
 
-#define DEFAULT_PORT "12862"
-
 // Once accepting a client, send the client to the socket where data can be sent/received
 // TODO: change to handle multiple client sockets
 int client_handler(SOCKET client_socket) {
-#define DEFAULT_BUFLEN 512
 
 	char recvbuf[DEFAULT_BUFLEN];
 	int iResult, iSendResult;
@@ -167,32 +166,3 @@ int create_server_socket(char** argv)
 
 	// ** NOTICE ** if there were multiple clients, we don't want the listening socket to close
 }
-
-/*
-int main(int argc, char** argv)
-{
-	WSADATA		socket_data = { 0 };
-	int			creation_result = 0;
-
-	creation_result = WSAStartup(MAKEWORD(2, 2), &socket_data);
-	if (creation_result != 0)
-	{
-		printf("[Engine Error]: failed to create valid socket!\n");
-		return EXIT_FAILURE;
-	}
-
-	printf("[Engine]: Socket context created %i\n", creation_result);
-
-	if (create_server_socket(argv) == 1) {
-		printf("Failed to start server or handle client.");
-		return EXIT_FAILURE;
-	}
-	else {
-		printf("Shut down successful.");
-		return EXIT_SUCCESS;
-	}
-
-	// If for some reason the server socket creation was never done, then exit on failure.
-	return EXIT_FAILURE;
-}
-*/

@@ -1,3 +1,5 @@
+#include "client_server_header.h"
+
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <Winsock2.h>
@@ -7,11 +9,8 @@
 #include <cstdio>
 #include <cstdlib>
 
-#define DEFAULT_PORT "12862"
-
 int client_connection(SOCKET ConnectSocket)
 {
-#define DEFAULT_BUFLEN 512
 
 	int recvbuflen = DEFAULT_BUFLEN;
 
@@ -138,32 +137,3 @@ int create_client_socket(char** argv)
 		return 0;
 	}
 }
-
-/*
-int main(int argc, char** argv)
-{
-	WSADATA		socket_data = { 0 };
-	int			creation_result = 0;
-
-	creation_result = WSAStartup(MAKEWORD(2, 2), &socket_data);
-	if (creation_result != 0)
-	{
-		printf("[Engine Error]: failed to create valid socket!\n");
-		return EXIT_FAILURE;
-	}
-
-	printf("[Engine]: Socket context created %i\n", creation_result);
-
-	if (create_client_socket(argv) == 1) {
-		printf("Failed to start client socket.");
-		return EXIT_FAILURE;
-	}
-	else {
-		printf("Shut down successful.");
-		return EXIT_SUCCESS;
-	}
-
-	// If for some reason the server socket creation was never done, then exit on failure.
-	return EXIT_FAILURE;
-}
-*/
