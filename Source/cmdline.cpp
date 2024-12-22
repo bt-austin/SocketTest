@@ -1,10 +1,10 @@
 #include "cmdline.h"
-#include "ArenaAllocator.h"
 #include "client_server_header.h"
 
 #include <malloc.h>
 #include <cstring>
 #include <cstdio>
+#include <cctype>
 
 #ifdef _WIN32
 	#pragma warning (disable : 6387)	// value could be '0'
@@ -12,23 +12,23 @@
 	#pragma warning (disable : 28183)	// same value (dumb error?)
 #endif // _WIN32
 
-static ArenaAllocator* arena_allocator = nullptr;
 
 cmdline_t* CreateCommandLine(int argc, char** argv)
 {
 	cmdline_t* cmdline = (cmdline_t*) malloc(sizeof(cmdline_t));
 	memset(cmdline, 0, sizeof(cmdline_t));
 
-	cmdline->argc = argc;
-	cmdline->argv = argv;
+	cmdline->argv	= argv;
+	cmdline->ip		= NULL;
+	cmdline->argc	= argc;
+	cmdline->client = false;
+	cmdline->server = false;
 
-	arena_allocator = new ArenaAllocator();
 	return cmdline;
 }
 
 void DeleteCommandLine(cmdline_t* cmdline)
 {
-	arena_allocator->Deallocate(cmdline->ip);
 	free(cmdline);
 	cmdline = nullptr;
 }
@@ -40,37 +40,22 @@ bool ParseCommandLine(cmdline_t* cmdline)
 		return false;
 	}
 
-	// Invalid index
-	cmdline->net = 0;
-
 	for (int i = 1; i < cmdline->argc; i++)
 	{
-		if (strcmp(cmdline->argv[i], "-app") == 0 && cmdline->argv[i + 1] != NULL)
+		if (strcmp(cmdline->argv[i], "-client") == 0 && cmdline->argv[i + 1] != NULL)
 		{
-			char* app = cmdline->argv[i + 1];
-			if (strcmp(app, "client") == 0)
-			{
-				cmdline->net |= NET_CLIENT;
-			}
-			else if (strcmp(app, "server") == 0)
-			{
-				cmdline->net |= NET_SERVER;
-			}
+			cmdline->client = true;
+			cmdline->ip = cmdline->argv[i + 1];
 		}
-		else if (strcmp(cmdline->argv[i], "-ip") == 0 && cmdline->argv[i + 1] != NULL)
+		else if (strcmp(cmdline->argv[i], "-server") == 0)
 		{
-			//
-			// FIXME: Make sure that if no IP is passed, kill the program!
-			//
-			size_t len = strlen(cmdline->argv[i + 1]);
-			cmdline->ip = static_cast<char*>(arena_allocator->Allocate(len * sizeof(char) + 1));
-			strcpy(cmdline->ip, cmdline->argv[i + 1]);
+			cmdline->server = true;
 		}
 	}
 
-	if (cmdline->net == 0)
+	if ((!cmdline->client && !cmdline->server) || (cmdline->client && cmdline->server))
 	{
-		// Failed to parse app...
+		// Can't be none or both!
 		return false;
 	}
 
@@ -79,14 +64,14 @@ bool ParseCommandLine(cmdline_t* cmdline)
 
 void ExecuteCommandLine(cmdline_t* cmdline)
 {
-	if (cmdline->net & NET_CLIENT)
+	if (cmdline->client)
 	{
 		// TODO: Excute Client Program
 		create_client_socket(cmdline->argv);
 	}
-	else if (cmdline->net & NET_SERVER)
+	else if (cmdline->server)
 	{
 		// TODO: Excute Server program
-		create_server_socket(cmdline->argv);
+		create_server_socket(NULL);
 	}
 }

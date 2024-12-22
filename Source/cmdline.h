@@ -3,13 +3,15 @@
 
 #define NET_CLIENT 1
 #define NET_SERVER 2
+#define NET_UNKNOWN 3
 
 struct cmdline_t
 {
 	char**	argv;
 	char*	ip;
 	int		argc;
-	int		net;
+	bool	client;
+	bool	server;
 };
 
 cmdline_t* CreateCommandLine(int argc, char** argv);
