@@ -67,8 +67,20 @@ int client_connection(SOCKET ConnectSocket)
 	return 0;
 }
 
-int create_client_socket(char** argv)
+int create_client_socket(char* ip)
 {
+	WSADATA		socket_data = { 0 };
+	int			creation_result = 0;
+
+	creation_result = WSAStartup(MAKEWORD(2, 2), &socket_data);
+	if (creation_result != 0)
+	{
+		printf("[Engine Error]: failed to create valid socket!\n");
+		return EXIT_FAILURE;
+	}
+
+	printf("[Engine]: Socket context created %i\n", creation_result);
+
 	struct addrinfo* result = NULL,
 		* ptr = NULL,
 		hints;
@@ -81,7 +93,7 @@ int create_client_socket(char** argv)
 	hints.ai_protocol = IPPROTO_TCP;
 
 	// Resolve the server address and port
-	iResult = getaddrinfo(argv[1], DEFAULT_PORT, &hints, &result);
+	iResult = getaddrinfo(ip, DEFAULT_PORT, &hints, &result);
 	if (iResult != 0) {
 		printf("getaddrinfo failed: %d\n", iResult);
 		WSACleanup();
