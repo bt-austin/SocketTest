@@ -64,7 +64,7 @@ bool ParseCommandLine(cmdline_t* cmdline)
 
 void ExecuteCommandLine(cmdline_t* cmdline)
 {
-	if (cmdline->net & NET_CLIENT)
+	if (cmdline->client)
 	{
 		// TODO: Excute Client Program
 		create_client_socket(cmdline->ip);
