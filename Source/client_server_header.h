@@ -16,14 +16,14 @@
 // CLIENT.CPP
 //
 
-int create_client_socket(char** argv);
+int create_client_socket(char* ip);
 int client_connection(SOCKET ConnectSocket);
 
 //
 // SERVER.CPP
 //
 
-int create_server_socket(char** argv);
+int create_server_socket();
 int client_handler(SOCKET client_socket);
 
 #endif

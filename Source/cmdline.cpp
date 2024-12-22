@@ -82,11 +82,11 @@ void ExecuteCommandLine(cmdline_t* cmdline)
 	if (cmdline->net & NET_CLIENT)
 	{
 		// TODO: Excute Client Program
-		create_client_socket(cmdline->argv);
+		create_client_socket(cmdline->ip);
 	}
 	else if (cmdline->net & NET_SERVER)
 	{
 		// TODO: Excute Server program
-		create_server_socket(cmdline->argv);
+		create_server_socket();
 	}
 }

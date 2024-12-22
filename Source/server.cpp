@@ -65,7 +65,7 @@ int client_handler(SOCKET client_socket) {
 
 // Create the server's welcoming socket, and send the connected clients to client handler
 // TODO: Change to use multi-threading for multiple clients, currently accepts only one.
-int create_server_socket(char** argv)
+int create_server_socket()
 {
 	WSADATA		socket_data = { 0 };
 	int			creation_result = 0;
@@ -139,13 +139,16 @@ int create_server_socket(char** argv)
 	ClientSocket = INVALID_SOCKET;
 
 	// Accept a client socket
-	ClientSocket = accept(ListenSocket, NULL, NULL);
-	if (ClientSocket == INVALID_SOCKET) {
-		printf("accept failed: %d\n", WSAGetLastError());
-		closesocket(ListenSocket);
-		WSACleanup();
-		return 1;
+	while (TRUE) {
+		ClientSocket = accept(ListenSocket, NULL, NULL);
+		if (ClientSocket == INVALID_SOCKET) {
+			printf("accept failed: %d\n", WSAGetLastError());
+			closesocket(ListenSocket);
+			WSACleanup();
+			return 1;
+		}
 	}
+	
 
 	// ** NOTICE ** not sure if we want to return at this point 
 	// considering we want the listening socket to remain active
