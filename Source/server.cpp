@@ -30,7 +30,7 @@ int client_handler(SOCKET client_socket) {
 				// On failure to send, close socket and cleanup
 				printf("send failed: %d\n", WSAGetLastError());
 				closesocket(client_socket);
-				WSACleanup();
+				//WSACleanup();
 				return 1;
 			}
 			printf("Bytes sent: %d\n", iSendResult);
@@ -41,7 +41,7 @@ int client_handler(SOCKET client_socket) {
 			// On failure to receive, close socket and cleanup
 			printf("recv failed: %d\n", WSAGetLastError());
 			closesocket(client_socket);
-			WSACleanup();
+			//WSACleanup();
 			return 1;
 		}
 
@@ -52,13 +52,13 @@ int client_handler(SOCKET client_socket) {
 	if (iResult == SOCKET_ERROR) {
 		printf("shutdown failed: %d\n", WSAGetLastError());
 		closesocket(client_socket);
-		WSACleanup();
+		//WSACleanup();
 		return 1;
 	}
 
 	// cleanup
 	closesocket(client_socket);
-	WSACleanup();
+	//WSACleanup();
 
 	return 0;
 }
@@ -130,42 +130,47 @@ int create_server_socket()
 		return 1;
 	}
 
+	unsigned long b = 1;
+
+	//ioctlsocket(ListenSocket, FIONBIO, &b);
+
 	// No longer need result info
 	freeaddrinfo(result);
 
 	// Temporary Socket for accepting clients
-	SOCKET ClientSocket;
-
-	ClientSocket = INVALID_SOCKET;
+	
 
 	// Accept a client socket
-	while (TRUE) {
+	while (true) {
+		SOCKET ClientSocket;
+		ClientSocket = INVALID_SOCKET;
 		ClientSocket = accept(ListenSocket, NULL, NULL);
-		if (ClientSocket == INVALID_SOCKET) {
-			printf("accept failed: %d\n", WSAGetLastError());
-			closesocket(ListenSocket);
-			WSACleanup();
-			return 1;
+
+		if (ClientSocket != INVALID_SOCKET) {
+			// ** NOTICE ** not sure if we want to return at this point 
+			// considering we want the listening socket to remain active
+			// Curretnly, if the client socket fails or closes, we return 
+			// from create_server_socket for testing.
+
+			// Send the client from the welcoming socket to the client handler.
+			if (client_handler(ClientSocket) == 1) {
+				printf("Failure handling client socket.\n");
+				closesocket(ClientSocket);
+				//return 1;
+			}
+			else {
+				printf("Success handling client socket.\n");
+				closesocket(ClientSocket);
+				//WSACleanup();
+				/*return 0;*/
+			}
 		}
+		printf("Failed to find connection.\n");
+		Sleep(1000);
 	}
 	
 
-	// ** NOTICE ** not sure if we want to return at this point 
-	// considering we want the listening socket to remain active
-	// Curretnly, if the client socket fails or closes, we return 
-	// from create_server_socket for testing.
-
-	// Send the client from the welcoming socket to the client handler.
-	if (client_handler(ClientSocket) == 1) {
-		printf("Failure handling client socket.");
-		closesocket(ListenSocket);
-		WSACleanup();
-		return 1;
-	}
-	else {
-		printf("Success closing client socket");
-		return 0;
-	}
+	
 
 	// ** NOTICE ** if there were multiple clients, we don't want the listening socket to close
 }
